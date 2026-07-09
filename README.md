@@ -19,29 +19,67 @@ Sherlock operates fraud detectors (deepfake, voice cloning, behavioral analysis)
 ## 2. Architecture & Design
 
 ### Architecture Diagram
-```
-Meeting Connector (Abstract Interface)
-   │
-   ▼
-Event Normalizer
-   │
-   ▼
-Evidence Engine (NameSimilarity, CalendarMatch, SpeechPattern, Transcript, Behavioral, Temporal, LLMReasoning)
-   │
-   ▼
-Fusion Engine (Weighted Bayesian Odds Update)
-   │
-   ▼
-Confidence Engine (Exponential Moving Average Smoothing)
-   │
-   ▼
-Explainability Engine (Reasoning Chain & Uncertainty Identification)
-   │
-   ▼
-API Layer (FastAPI REST & WebSocket Stream)
-   │
-   ▼
-Frontend Dashboard (React + TypeScript + Tailwind)
+```mermaid
+graph TD
+    subgraph Connectors [Data Layer]
+        MC[Meeting Connector Interface]
+        MMC[MockMeetingConnector]
+        MMC -->|Events| MC
+    end
+
+    subgraph Core [AI Intelligence Engine]
+        EN[Event Normalizer]
+        MC -->|Raw Events| EN
+
+        subgraph Evidence [Evidence Engine]
+            NS[Name Similarity Analyzer]
+            CM[Calendar Match Analyzer]
+            SP[Speech Pattern Analyzer]
+            TA[Transcript Analyzer]
+            BA[Behavioral Analyzer]
+            TE[Temporal Analyzer]
+            LLM[LLM Reasoning Analyzer]
+        end
+        
+        EN -->|Normalized Events| NS
+        EN -->|Normalized Events| CM
+        EN -->|Normalized Events| SP
+        EN -->|Normalized Events| TA
+        EN -->|Normalized Events| BA
+        EN -->|Normalized Events| TE
+        EN -->|Normalized Events| LLM
+
+        FE[Fusion Engine<br/>Weighted Bayesian Odds]
+        NS -->|EvidenceItems| FE
+        CM -->|EvidenceItems| FE
+        SP -->|EvidenceItems| FE
+        TA -->|EvidenceItems| FE
+        BA -->|EvidenceItems| FE
+        TE -->|EvidenceItems| FE
+        LLM -->|EvidenceItems| FE
+
+        CE[Confidence Engine<br/>EMA Smoothing]
+        FE -->|Raw Probs| CE
+
+        EE[Explainability Engine<br/>Reasoning Chain]
+        CE -->|Smoothed Conf| EE
+        FE -->|Evidence Logs| EE
+    end
+
+    subgraph Presentation [API & UI Layer]
+        API[FastAPI Server]
+        FD[React Frontend Dashboard]
+        
+        EE -->|Predictions| API
+        API -->|WebSocket Stream| FD
+    end
+
+    style Connectors fill:#111827,stroke:#374151,stroke-width:1px,color:#f3f4f6
+    style Core fill:#0f172a,stroke:#334155,stroke-width:1px,color:#f3f4f6
+    style Presentation fill:#111827,stroke:#374151,stroke-width:1px,color:#f3f4f6
+    style FE fill:#312e81,stroke:#4338ca,stroke-width:1px,color:#f3f4f6
+    style CE fill:#1e3a8a,stroke:#1d4ed8,stroke-width:1px,color:#f3f4f6
+    style EE fill:#064e3b,stroke:#047857,stroke-width:1px,color:#f3f4f6
 ```
 
 ### Connector-Based Design
