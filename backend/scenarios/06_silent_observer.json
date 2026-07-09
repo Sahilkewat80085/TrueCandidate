@@ -1,0 +1,40 @@
+{
+  "scenario_id": "06_silent_observer",
+  "title": "Silent Observer",
+  "description": "An extra silent participant joins — system must not confuse observer with candidate",
+  "difficulty": "medium",
+  "expected_candidate": "p2",
+  "calendar_metadata": {
+    "candidate_name": "Carlos Rivera",
+    "candidate_email": "carlos.r@gmail.com",
+    "interviewer_names": ["Jennifer Lee"],
+    "scheduled_time": "2024-01-20T10:00:00Z",
+    "position": "DevOps Engineer"
+  },
+  "events": [
+    {"time": 0, "type": "meeting_started"},
+    {"time": 2, "type": "participant_joined", "participant_id": "p1", "display_name": "Jennifer Lee"},
+    {"time": 3, "type": "webcam_enabled", "participant_id": "p1"},
+    {"time": 10, "type": "participant_joined", "participant_id": "p3", "display_name": "HR Observer"},
+    {"time": 18, "type": "participant_joined", "participant_id": "p2", "display_name": "Carlos Rivera"},
+    {"time": 20, "type": "webcam_enabled", "participant_id": "p2"},
+    {"time": 24, "type": "speaking_started", "participant_id": "p1"},
+    {"time": 30, "type": "transcript_chunk", "participant_id": "p1", "text": "Hi Carlos! Welcome. I'm Jennifer Lee, and I'll be your interviewer today. We also have someone from HR observing quietly."},
+    {"time": 35, "type": "speaking_stopped", "participant_id": "p1"},
+    {"time": 37, "type": "speaking_started", "participant_id": "p2"},
+    {"time": 45, "type": "transcript_chunk", "participant_id": "p2", "text": "Hi Jennifer! I'm Carlos Rivera, here for the DevOps Engineer interview. No problem about the observer."},
+    {"time": 49, "type": "speaking_stopped", "participant_id": "p2"},
+    {"time": 51, "type": "speaking_started", "participant_id": "p1"},
+    {"time": 57, "type": "transcript_chunk", "participant_id": "p1", "text": "Tell me about your experience with container orchestration."},
+    {"time": 60, "type": "speaking_stopped", "participant_id": "p1"},
+    {"time": 62, "type": "speaking_started", "participant_id": "p2"},
+    {"time": 85, "type": "transcript_chunk", "participant_id": "p2", "text": "I've been working with Kubernetes for 3 years. I managed clusters with up to 500 pods and implemented auto-scaling policies. I also set up Helm charts for our deployment workflows."},
+    {"time": 90, "type": "speaking_stopped", "participant_id": "p2"},
+    {"time": 92, "type": "speaking_started", "participant_id": "p1"},
+    {"time": 98, "type": "transcript_chunk", "participant_id": "p1", "text": "How do you handle secrets management in a Kubernetes environment?"},
+    {"time": 101, "type": "speaking_stopped", "participant_id": "p1"},
+    {"time": 103, "type": "speaking_started", "participant_id": "p2"},
+    {"time": 125, "type": "transcript_chunk", "participant_id": "p2", "text": "I use HashiCorp Vault integrated with Kubernetes. Secrets are injected at runtime through sidecar containers. I also rotate secrets automatically every 30 days."},
+    {"time": 130, "type": "speaking_stopped", "participant_id": "p2"}
+  ]
+}

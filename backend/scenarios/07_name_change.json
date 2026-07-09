@@ -1,0 +1,40 @@
+{
+  "scenario_id": "07_name_change",
+  "title": "Display Name Changed Mid-Meeting",
+  "description": "Candidate starts with a generic name and changes it during the meeting",
+  "difficulty": "medium",
+  "expected_candidate": "p2",
+  "calendar_metadata": {
+    "candidate_name": "Aisha Mohammed",
+    "candidate_email": "aisha.m@protonmail.com",
+    "interviewer_names": ["Tom Wilson"],
+    "scheduled_time": "2024-01-21T13:00:00Z",
+    "position": "Frontend Developer"
+  },
+  "events": [
+    {"time": 0, "type": "meeting_started"},
+    {"time": 3, "type": "participant_joined", "participant_id": "p1", "display_name": "Tom Wilson"},
+    {"time": 5, "type": "webcam_enabled", "participant_id": "p1"},
+    {"time": 22, "type": "participant_joined", "participant_id": "p2", "display_name": "User123"},
+    {"time": 25, "type": "webcam_enabled", "participant_id": "p2"},
+    {"time": 28, "type": "speaking_started", "participant_id": "p1"},
+    {"time": 34, "type": "transcript_chunk", "participant_id": "p1", "text": "Hello! I'm Tom Wilson. I see your name shows as User123 — are you Aisha?"},
+    {"time": 38, "type": "speaking_stopped", "participant_id": "p1"},
+    {"time": 40, "type": "speaking_started", "participant_id": "p2"},
+    {"time": 48, "type": "transcript_chunk", "participant_id": "p2", "text": "Yes hi! I'm Aisha Mohammed, sorry about the display name. Let me change it real quick."},
+    {"time": 52, "type": "speaking_stopped", "participant_id": "p2"},
+    {"time": 54, "type": "display_name_changed", "participant_id": "p2", "old_name": "User123", "new_name": "Aisha Mohammed"},
+    {"time": 56, "type": "speaking_started", "participant_id": "p1"},
+    {"time": 62, "type": "transcript_chunk", "participant_id": "p1", "text": "Perfect! Welcome Aisha. Tell me about your experience with modern frontend frameworks."},
+    {"time": 66, "type": "speaking_stopped", "participant_id": "p1"},
+    {"time": 68, "type": "speaking_started", "participant_id": "p2"},
+    {"time": 90, "type": "transcript_chunk", "participant_id": "p2", "text": "I've been working with React and Vue.js for 3 years. I love building accessible and performant user interfaces. My most recent project was a design system used by 12 teams."},
+    {"time": 96, "type": "speaking_stopped", "participant_id": "p2"},
+    {"time": 98, "type": "speaking_started", "participant_id": "p1"},
+    {"time": 104, "type": "transcript_chunk", "participant_id": "p1", "text": "How do you ensure accessibility in your components?"},
+    {"time": 107, "type": "speaking_stopped", "participant_id": "p1"},
+    {"time": 109, "type": "speaking_started", "participant_id": "p2"},
+    {"time": 130, "type": "transcript_chunk", "participant_id": "p2", "text": "I follow WCAG 2.1 guidelines. I use semantic HTML, proper ARIA labels, and test with screen readers. I also built custom hooks for keyboard navigation."},
+    {"time": 135, "type": "speaking_stopped", "participant_id": "p2"}
+  ]
+}

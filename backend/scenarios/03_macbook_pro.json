@@ -1,0 +1,40 @@
+{
+  "scenario_id": "03_macbook_pro",
+  "title": "MacBook Pro Display Name",
+  "description": "Candidate display name is 'MacBook Pro' — no name match possible, must rely on behavioral signals",
+  "difficulty": "hard",
+  "expected_candidate": "p2",
+  "calendar_metadata": {
+    "candidate_name": "Rahul Gupta",
+    "candidate_email": "rahul.gupta@gmail.com",
+    "interviewer_names": ["Sarah Johnson"],
+    "scheduled_time": "2024-01-17T09:00:00Z",
+    "position": "Full Stack Developer"
+  },
+  "events": [
+    {"time": 0, "type": "meeting_started"},
+    {"time": 3, "type": "participant_joined", "participant_id": "p1", "display_name": "Sarah Johnson"},
+    {"time": 5, "type": "webcam_enabled", "participant_id": "p1"},
+    {"time": 25, "type": "participant_joined", "participant_id": "p2", "display_name": "MacBook Pro"},
+    {"time": 28, "type": "webcam_enabled", "participant_id": "p2"},
+    {"time": 32, "type": "speaking_started", "participant_id": "p1"},
+    {"time": 38, "type": "transcript_chunk", "participant_id": "p1", "text": "Hello! I see your name shows as MacBook Pro. Are you Rahul Gupta?"},
+    {"time": 42, "type": "speaking_stopped", "participant_id": "p1"},
+    {"time": 44, "type": "speaking_started", "participant_id": "p2"},
+    {"time": 52, "type": "transcript_chunk", "participant_id": "p2", "text": "Yes, hi! Sorry about that, I'm Rahul Gupta. Let me fix my display name."},
+    {"time": 56, "type": "speaking_stopped", "participant_id": "p2"},
+    {"time": 58, "type": "display_name_changed", "participant_id": "p2", "old_name": "MacBook Pro", "new_name": "Rahul G"},
+    {"time": 60, "type": "speaking_started", "participant_id": "p1"},
+    {"time": 66, "type": "transcript_chunk", "participant_id": "p1", "text": "No worries! I'm Sarah Johnson, the hiring manager. Welcome to your interview for the Full Stack Developer position."},
+    {"time": 70, "type": "speaking_stopped", "participant_id": "p1"},
+    {"time": 72, "type": "speaking_started", "participant_id": "p2"},
+    {"time": 90, "type": "transcript_chunk", "participant_id": "p2", "text": "Thank you Sarah! I'm really excited about this opportunity. I've been working as a full stack developer for 2 years, primarily with React and Django."},
+    {"time": 95, "type": "speaking_stopped", "participant_id": "p2"},
+    {"time": 97, "type": "speaking_started", "participant_id": "p1"},
+    {"time": 103, "type": "transcript_chunk", "participant_id": "p1", "text": "Tell me about a project where you worked on both frontend and backend."},
+    {"time": 106, "type": "speaking_stopped", "participant_id": "p1"},
+    {"time": 108, "type": "speaking_started", "participant_id": "p2"},
+    {"time": 135, "type": "transcript_chunk", "participant_id": "p2", "text": "I built an e-commerce platform from scratch. I designed the React frontend with Redux state management and built the Django REST API with PostgreSQL. I also set up the CI/CD pipeline and deployed it on AWS."},
+    {"time": 140, "type": "speaking_stopped", "participant_id": "p2"}
+  ]
+}

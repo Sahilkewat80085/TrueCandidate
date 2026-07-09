@@ -1,0 +1,42 @@
+{
+  "scenario_id": "09_camera_off",
+  "title": "Camera Off Initially",
+  "description": "Candidate joins with camera off and enables it later — behavioral signal delayed",
+  "difficulty": "medium",
+  "expected_candidate": "p2",
+  "calendar_metadata": {
+    "candidate_name": "Nina Petrov",
+    "candidate_email": "nina.petrov@gmail.com",
+    "interviewer_names": ["James Wright"],
+    "scheduled_time": "2024-01-23T11:00:00Z",
+    "position": "Security Engineer"
+  },
+  "events": [
+    {"time": 0, "type": "meeting_started"},
+    {"time": 3, "type": "participant_joined", "participant_id": "p1", "display_name": "James Wright"},
+    {"time": 5, "type": "webcam_enabled", "participant_id": "p1"},
+    {"time": 20, "type": "participant_joined", "participant_id": "p2", "display_name": "Nina Petrov"},
+    {"time": 25, "type": "speaking_started", "participant_id": "p1"},
+    {"time": 31, "type": "transcript_chunk", "participant_id": "p1", "text": "Hi Nina! I'm James Wright. I notice your camera is off — would you like to turn it on?"},
+    {"time": 35, "type": "speaking_stopped", "participant_id": "p1"},
+    {"time": 37, "type": "speaking_started", "participant_id": "p2"},
+    {"time": 44, "type": "transcript_chunk", "participant_id": "p2", "text": "Hi James! Sorry, I was having some camera issues. Let me try again."},
+    {"time": 48, "type": "speaking_stopped", "participant_id": "p2"},
+    {"time": 50, "type": "webcam_enabled", "participant_id": "p2"},
+    {"time": 53, "type": "speaking_started", "participant_id": "p2"},
+    {"time": 58, "type": "transcript_chunk", "participant_id": "p2", "text": "There we go! I'm Nina Petrov, here for the Security Engineer interview. I'm really interested in this role."},
+    {"time": 63, "type": "speaking_stopped", "participant_id": "p2"},
+    {"time": 65, "type": "speaking_started", "participant_id": "p1"},
+    {"time": 71, "type": "transcript_chunk", "participant_id": "p1", "text": "Great to see you! Tell me about your experience with security assessments."},
+    {"time": 74, "type": "speaking_stopped", "participant_id": "p1"},
+    {"time": 76, "type": "speaking_started", "participant_id": "p2"},
+    {"time": 100, "type": "transcript_chunk", "participant_id": "p2", "text": "I've conducted penetration tests for over 30 organizations. I specialize in web application security and have found critical vulnerabilities in several Fortune 500 companies."},
+    {"time": 105, "type": "speaking_stopped", "participant_id": "p2"},
+    {"time": 107, "type": "speaking_started", "participant_id": "p1"},
+    {"time": 113, "type": "transcript_chunk", "participant_id": "p1", "text": "Walk me through how you approach a new security audit."},
+    {"time": 116, "type": "speaking_stopped", "participant_id": "p1"},
+    {"time": 118, "type": "speaking_started", "participant_id": "p2"},
+    {"time": 140, "type": "transcript_chunk", "participant_id": "p2", "text": "I start with reconnaissance and threat modeling. Then I perform automated scanning followed by manual testing. I document everything and provide remediation recommendations."},
+    {"time": 145, "type": "speaking_stopped", "participant_id": "p2"}
+  ]
+}

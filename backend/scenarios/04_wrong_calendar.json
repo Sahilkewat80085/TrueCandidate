@@ -1,0 +1,39 @@
+{
+  "scenario_id": "04_wrong_calendar",
+  "title": "Wrong Calendar Entry",
+  "description": "Calendar says 'John Smith' but actual candidate is 'Jane Smith' — metadata is unreliable",
+  "difficulty": "hard",
+  "expected_candidate": "p2",
+  "calendar_metadata": {
+    "candidate_name": "John Smith",
+    "candidate_email": "john.smith@email.com",
+    "interviewer_names": ["Maria Garcia"],
+    "scheduled_time": "2024-01-18T11:00:00Z",
+    "position": "Data Engineer"
+  },
+  "events": [
+    {"time": 0, "type": "meeting_started"},
+    {"time": 2, "type": "participant_joined", "participant_id": "p1", "display_name": "Maria Garcia"},
+    {"time": 4, "type": "webcam_enabled", "participant_id": "p1"},
+    {"time": 18, "type": "participant_joined", "participant_id": "p2", "display_name": "Jane Smith"},
+    {"time": 20, "type": "webcam_enabled", "participant_id": "p2"},
+    {"time": 24, "type": "speaking_started", "participant_id": "p1"},
+    {"time": 30, "type": "transcript_chunk", "participant_id": "p1", "text": "Hi! I was expecting John Smith — are you here for the Data Engineer interview?"},
+    {"time": 34, "type": "speaking_stopped", "participant_id": "p1"},
+    {"time": 36, "type": "speaking_started", "participant_id": "p2"},
+    {"time": 45, "type": "transcript_chunk", "participant_id": "p2", "text": "Hi Maria! Yes, I'm Jane Smith. I think there might have been a mix-up with the first name in the calendar invite. I applied for the Data Engineer position."},
+    {"time": 50, "type": "speaking_stopped", "participant_id": "p2"},
+    {"time": 52, "type": "speaking_started", "participant_id": "p1"},
+    {"time": 58, "type": "transcript_chunk", "participant_id": "p1", "text": "No problem at all! Let me pull up your resume. So Jane, tell me about your experience with data pipelines."},
+    {"time": 62, "type": "speaking_stopped", "participant_id": "p1"},
+    {"time": 64, "type": "speaking_started", "participant_id": "p2"},
+    {"time": 90, "type": "transcript_chunk", "participant_id": "p2", "text": "I've been working with Apache Spark and Airflow for the past 3 years. At my current company, I designed and maintained ETL pipelines processing terabytes of data daily."},
+    {"time": 95, "type": "speaking_stopped", "participant_id": "p2"},
+    {"time": 97, "type": "speaking_started", "participant_id": "p1"},
+    {"time": 103, "type": "transcript_chunk", "participant_id": "p1", "text": "How do you handle data quality issues in your pipelines?"},
+    {"time": 106, "type": "speaking_stopped", "participant_id": "p1"},
+    {"time": 108, "type": "speaking_started", "participant_id": "p2"},
+    {"time": 130, "type": "transcript_chunk", "participant_id": "p2", "text": "I implement data validation at multiple stages — ingestion, transformation, and output. I use Great Expectations for automated data quality checks and set up alerts for anomalies."},
+    {"time": 135, "type": "speaking_stopped", "participant_id": "p2"}
+  ]
+}
