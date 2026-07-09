@@ -8,6 +8,12 @@ This is the main FastAPI application that ties together:
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
+# Add project root to path to prevent ModuleNotFoundError
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
 import asyncio
 import logging
 from contextlib import asynccontextmanager
