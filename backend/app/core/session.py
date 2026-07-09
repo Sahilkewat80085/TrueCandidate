@@ -70,7 +70,13 @@ class MeetingSessionManager:
 
         # Register engine callback
         if update_callback:
-            engine.on_update(lambda pred, evt, evid: update_callback(meeting_id, pred, evt, evid))
+            def sync_wrapper(pred, evt, evid):
+                try:
+                    loop = asyncio.get_running_loop()
+                    loop.create_task(update_callback(meeting_id, pred, evt, evid))
+                except RuntimeError:
+                    pass
+            engine.on_update(sync_wrapper)
 
         # Start replay in background
         session = self._sessions[meeting_id]
