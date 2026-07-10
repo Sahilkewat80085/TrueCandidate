@@ -222,6 +222,11 @@ python backend/evaluation/evaluator.py
 - **LLM Usage**: The LLM is used strictly asynchronously for transcript reasoning (summarizing and picking context clues) to prevent blocking the real-time event loop.
 
 ### Future Work
-- Support for **Zoom Meeting SDK** and **Recall.ai** server-side bots (documented in `docs/future_adapters.md`).
+- Support for **Zoom Meeting SDK** and **Recall.ai** server-side bots (documented in [docs/future_adapters.md](file:///c:/Users/kkewa/OneDrive/Desktop/Projects/TrueCandidate/docs/future_adapters.md)).
 - Multi-language support in the Transcript Analyzer.
 - Continuous learning of analyzer weights using reinforcement learning from user corrections.
+
+---
+
+## 9. Demo Video Script
+A professional, step-by-step video script for recording the 5-10 minute project walk-through is available in [docs/demo_script.md](file:///c:/Users/kkewa/OneDrive/Desktop/Projects/TrueCandidate/docs/demo_script.md).
