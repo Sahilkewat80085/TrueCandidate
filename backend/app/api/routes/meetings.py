@@ -14,6 +14,45 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/meetings", tags=["meetings"])
 
 
+# Mock Database matching Google Meet codes to Candidate Calendar details
+CALENDAR_REGISTRY = {
+    "abc-defg-hij": {
+        "candidate_name": "Priya Sharma",
+        "candidate_email": "priya.sharma@gmail.com",
+        "interviewer_names": ["Alex Chen"],
+        "position": "Software Engineer Intern"
+    },
+    "qwe-rtyu-iop": {
+        "candidate_name": "Samantha Patel",
+        "candidate_email": "samantha.patel@outlook.com",
+        "interviewer_names": ["David Kim"],
+        "position": "Backend Developer"
+    },
+    "zxc-vbnm-asd": {
+        "candidate_name": "Rahul Gupta",
+        "candidate_email": "rahul.gupta@gmail.com",
+        "interviewer_names": ["Sarah Johnson"],
+        "position": "Full Stack Developer"
+    }
+}
+
+
+@router.get("/calendar/{meeting_code}", response_model=CalendarMetadata)
+async def get_calendar_by_code(meeting_code: str):
+    """Retrieve candidate calendar metadata automatically based on the Google Meet code."""
+    # Lookup in registry, default to a fallback candidate if code not registered
+    data = CALENDAR_REGISTRY.get(meeting_code.lower())
+    if not data:
+        # Generate a dynamic fallback so it works for any random Meet link
+        data = {
+            "candidate_name": "Jane Doe",
+            "candidate_email": "jane.doe@live.com",
+            "interviewer_names": ["Alex Chen"],
+            "position": "Software Engineer (Live Demo)"
+        }
+    return CalendarMetadata(**data)
+
+
 class StartScenarioRequest(BaseModel):
     scenario_id: str
     speed: float = 5.0  # Default: 5x speed for demo

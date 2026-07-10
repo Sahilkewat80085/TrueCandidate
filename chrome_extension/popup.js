@@ -5,18 +5,61 @@ document.addEventListener('DOMContentLoaded', () => {
   const stopBtn = document.getElementById('stop-btn');
   const sessionIdText = document.getElementById('session-id');
 
+  // Input elements
+  const candidateNameInput = document.getElementById('candidate-name');
+  const candidateEmailInput = document.getElementById('candidate-email');
+  const interviewerNameInput = document.getElementById('interviewer-name');
+  const positionInput = document.getElementById('position');
+
   // Check if session already running
   chrome.storage.local.get(['meetingId', 'candidateName'], (data) => {
     if (data.meetingId) {
       showActiveSession(data.meetingId);
+    } else {
+      // Auto-fetch calendar info based on current Meet tab URL
+      autoFetchCalendarDetails();
     }
   });
 
+  // Automatically fetches candidate info from backend using Meet code
+  function autoFetchCalendarDetails() {
+    chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+      const tab = tabs[0];
+      if (!tab || !tab.url) return;
+
+      try {
+        const url = new URL(tab.url);
+        if (url.hostname === "meet.google.com") {
+          // Meet code is the path, e.g. "abc-defg-hij" (remove leading slashes)
+          const code = url.pathname.replace(/^\/+/g, '').split('?')[0];
+          
+          if (code && code !== "landing" && code.match(/^[a-z]{3}-[a-z]{4}-[a-z]{3}$/)) {
+            console.log(`[Extension] Detected Google Meet code: ${code}. Fetching calendar...`);
+            
+            const res = await fetch(`http://localhost:8000/api/meetings/calendar/${code}`);
+            if (res.ok) {
+              const cal = await res.json();
+              console.log("[Extension] Auto-fetched calendar details:", cal);
+              
+              // Pre-fill inputs automatically
+              candidateNameInput.value = cal.candidate_name || "";
+              candidateEmailInput.value = cal.candidate_email || "";
+              interviewerNameInput.value = cal.interviewer_names ? cal.interviewer_names.join(', ') : "";
+              positionInput.value = cal.position || "";
+            }
+          }
+        }
+      } catch (e) {
+        console.error("[Extension] Failed to auto-fetch calendar details:", e);
+      }
+    });
+  }
+
   startBtn.addEventListener('click', async () => {
-    const candidateName = document.getElementById('candidate-name').value;
-    const candidateEmail = document.getElementById('candidate-email').value;
-    const interviewerName = document.getElementById('interviewer-name').value;
-    const position = document.getElementById('position').value;
+    const candidateName = candidateNameInput.value;
+    const candidateEmail = candidateEmailInput.value;
+    const interviewerName = interviewerNameInput.value;
+    const position = positionInput.value;
 
     if (!candidateName) {
       alert("Candidate name is required.");
@@ -34,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify({
           candidate_name: candidateName,
           candidate_email: candidateEmail,
-          interviewer_names: interviewerName ? [interviewerName] : [],
+          interviewer_names: interviewerName ? interviewerName.split(',').map(n => n.trim()) : [],
           position: position
         })
       });
@@ -86,5 +129,6 @@ document.addEventListener('DOMContentLoaded', () => {
     activeSession.style.display = 'none';
     startBtn.disabled = false;
     startBtn.innerText = "Start Live Link";
+    autoFetchCalendarDetails(); // Refetch details for the tab
   }
 });
