@@ -1,44 +1,35 @@
-# TrueCandidate — AI-Powered Interview Candidate Identification System
+# 🎯 TrueCandidate — Real-Time AI Candidate Identification System
 
-TrueCandidate is a production-quality real-time candidate identification system designed for Sherlock. It monitors live meeting events (participant activity, audio/speaking durations, webcams, live transcripts, and calendar metadata) to continuously compute a confidence score for which participant is the actual candidate, generating live human-readable reasoning chains that explain its decisions.
-
----
-
-## 1. Problem & Challenge
-
-Sherlock operates fraud detectors (deepfake, voice cloning, behavioral analysis) that must run **exclusively** on the interview candidate's streams. Misidentifying the candidate breaks the downstream pipeline. Real-world meetings present numerous ambiguities:
-- Candidates joining as `MacBook Pro`, `iPhone`, or generic names.
-- Candidates using nicknames (e.g. `Sam` vs `Samantha Patel`).
-- Incorrect or mismatched calendar invite names.
-- Multiple interviewers speaking and sharing screens.
-- Silent HR observers.
-- Mid-meeting display name changes, camera toggles, or network rejoins.
+> **A production-ready prototype built for the Sherlock Internship Challenge.**  
+> Continuous Multi-Signal Evidence Fusion, Bayesian Odds Propagation, and Explanatory Reasoning Chains for Live Video Interviews.
 
 ---
 
-## 2. Architecture & Design
+## ─── 🌐 SYSTEM ARCHITECTURE & DATA FLOW ───
 
-### Architecture Diagram
 ```mermaid
 graph TD
-    subgraph Connectors [Data Layer]
+    subgraph Connectors [1. Data Connection Layer]
         MC[Meeting Connector Interface]
-        MMC[MockMeetingConnector]
-        MMC -->|Events| MC
+        MMC[MockMeetingConnector <br/> Replays JSON Scenarios]
+        EXT[Chrome Extension <br/> Scrapes Live Google Meet DOM]
+        
+        MMC -->|JSON Events| MC
+        EXT -->|REST Events| MC
     end
 
-    subgraph Core [AI Intelligence Engine]
+    subgraph Core [2. Core Intelligence Engine]
         EN[Event Normalizer]
-        MC -->|Raw Events| EN
+        MC -->|Raw Telemetry| EN
 
-        subgraph Evidence [Evidence Engine]
-            NS[Name Similarity Analyzer]
-            CM[Calendar Match Analyzer]
-            SP[Speech Pattern Analyzer]
-            TA[Transcript Analyzer]
-            BA[Behavioral Analyzer]
-            TE[Temporal Analyzer]
-            LLM[LLM Reasoning Analyzer]
+        subgraph Evidence [3. Multi-Signal Evidence Engine]
+            NS[Name Similarity Analyzer <br/> Levenshtein + Token Overlap]
+            CM[Calendar Match Analyzer <br/> Guest List Cross-Ref]
+            SP[Speech Pattern Analyzer <br/> Speaking Durations]
+            TA[Transcript Analyzer <br/> NLP Cues & Resume References]
+            BA[Behavioral Analyzer <br/> Webcam State & Renaming Audits]
+            TE[Temporal Analyzer <br/> Join Ordering Dynamics]
+            LLM[LLM Reasoning Analyzer <br/> Semantic Context Parser]
         end
         
         EN -->|Normalized Events| NS
@@ -49,161 +40,229 @@ graph TD
         EN -->|Normalized Events| TE
         EN -->|Normalized Events| LLM
 
-        FE[Fusion Engine<br/>Weighted Bayesian Odds]
-        NS -->|EvidenceItems| FE
-        CM -->|EvidenceItems| FE
-        SP -->|EvidenceItems| FE
-        TA -->|EvidenceItems| FE
-        BA -->|EvidenceItems| FE
-        TE -->|EvidenceItems| FE
-        LLM -->|EvidenceItems| FE
+        subgraph Fusion [4. Decision & Propagation Layer]
+            FE[Fusion Engine <br/> Weighted Bayesian log-odds update]
+            CE[Confidence Engine <br/> EMA Smoothing + Categorizer]
+        end
 
-        CE[Confidence Engine<br/>EMA Smoothing]
-        FE -->|Raw Probs| CE
+        NS -->|EvidenceItem logs| FE
+        CM -->|EvidenceItem logs| FE
+        SP -->|EvidenceItem logs| FE
+        TA -->|EvidenceItem logs| FE
+        BA -->|EvidenceItem logs| FE
+        TE -->|EvidenceItem logs| FE
+        LLM -->|EvidenceItem logs| FE
 
-        EE[Explainability Engine<br/>Reasoning Chain]
-        CE -->|Smoothed Conf| EE
-        FE -->|Evidence Logs| EE
+        FE -->|Raw Odds| CE
+
+        subgraph Explainability [5. Explainability Layer]
+            EE[Explainability Engine <br/> Reasoning Tree & Role Inference]
+        end
+
+        CE -->|Smoothed Confidence| EE
+        FE -->|Accumulated Evidence Logs| EE
     end
 
-    subgraph Presentation [API & UI Layer]
-        API[FastAPI Server]
-        FD[React Frontend Dashboard]
+    subgraph Presentation [6. Telemetry & Presentation Layer]
+        API[FastAPI Server REST + WebSockets]
+        FD[React Frontend Dashboard <br/> Muted Obsidian Tech Theme]
         
-        EE -->|Predictions| API
+        EE -->|Telemetry & Explanations| API
         API -->|WebSocket Stream| FD
     end
 
-    style Connectors fill:#111827,stroke:#374151,stroke-width:1px,color:#f3f4f6
-    style Core fill:#0f172a,stroke:#334155,stroke-width:1px,color:#f3f4f6
-    style Presentation fill:#111827,stroke:#374151,stroke-width:1px,color:#f3f4f6
-    style FE fill:#312e81,stroke:#4338ca,stroke-width:1px,color:#f3f4f6
-    style CE fill:#1e3a8a,stroke:#1d4ed8,stroke-width:1px,color:#f3f4f6
-    style EE fill:#064e3b,stroke:#047857,stroke-width:1px,color:#f3f4f6
+    style Connectors fill:#09090b,stroke:#27272a,stroke-width:1px,color:#cbd5e1
+    style Core fill:#0c0c0e,stroke:#1e1e24,stroke-width:1px,color:#cbd5e1
+    style Presentation fill:#09090b,stroke:#27272a,stroke-width:1px,color:#cbd5e1
+    style FE fill:#062016,stroke:#0f766e,stroke-width:1px,color:#cbd5e1
+    style CE fill:#172554,stroke:#1d4ed8,stroke-width:1px,color:#cbd5e1
+    style EE fill:#3f1624,stroke:#be185d,stroke-width:1px,color:#cbd5e1
 ```
 
-### Connector-Based Design
-The primary architecture is **connector-based**. We explicitly do not build a browser extension or platform integration as the primary system. Instead, the AI engine consumes normalized participant events from a `MeetingConnector` interface. This ensures that the engine is completely platform-independent and can support Zoom, Microsoft Teams, Google Meet, or Recall.ai bots by swapping the adapter.
+---
 
-### Core Algorithms
-1. **Multi-Signal Evidence Fusion**: 7 independent signal analyzers evaluate incoming normalized events and output `EvidenceItem` logs containing scoring (-1.0 to 1.0), weight (importance), and human-readable reasoning.
-2. **Bayesian Odds Update**: The Fusion Engine translates evidence scores into log-likelihood updates and propagates them across participants using a Bayesian update rule.
-3. **Temporal Smoothing**: A calibrated Exponential Moving Average (EMA) prevents wild confidence spikes, ensuring smooth transitions.
-4. **Explainability Engine**: The system identifies the positive and negative signals driving the candidate selection, lists current uncertainty factors (e.g. close second prediction, falling trends, device display names), and exposes this real-time explanation on the dashboard.
+## ─── 💡 THE CHALLENGE & CORE VALUE PROPOSITION ───
+
+Sherlock runs real-time fraud detection pipelines (such as deepfake detection, voice cloning validation, and passive behavioral verification) during remote interviews. For these detectors to operate correctly without throwing false alarms, **they must monitor only the candidate's streams.**
+
+However, real remote meetings are highly ambiguous:
+* Candidates join as generic device names (e.g., **"MacBook Pro"** or **"iPhone"**).
+* Candidates use abbreviated names or nicknames (e.g., **"Sam"** instead of **"Samantha Patel"**).
+* Calendar metadata can be wrong or outdated (e.g., calendar invite says **"John Smith"** but candidate is **"Jane Smith"**).
+* Multiple interviewers are active, sharing screens, and generating transcript logs.
+* Silent observers (such as HR managers) are present in the call.
+
+### The TrueCandidate Solution: Multi-Signal Evidence Fusion
+TrueCandidate resolves this ambiguity by combining several independent signals. Instead of relying on a single data point (like matching names), it acts like a digital detective: it gathers names, check-in times, speaking turn durations, transcript semantics, and webcam state changes, processing them through a **Bayesian evidence fusion pipeline**.
 
 ---
 
-## 3. Tech Stack
+## ─── 🛠️ DEEP DIVE: THE 7 SIGNAL ANALYZERS ───
 
-- **Backend**: FastAPI (Python 3.11/3.12), Pydantic v2 (type validation), Uvicorn, Websockets.
-- **Frontend**: React 18, TypeScript, Vite, Recharts (confidence graphs), Vanilla CSS (Design system).
-- **Evaluation & Tests**: Pytest, asyncio evaluation suite.
+The system evaluates incoming telemetry through 7 distinct, stateless analyzers. Each analyzer evaluates events and logs positive or negative `EvidenceItem` records:
+
+| Analyzer | Target Metrics | Logic / Algorithm | Default Weight |
+| :--- | :--- | :--- | :--- |
+| **Name Similarity** | Display Names, Emails | Computes Levenshtein Distance & Token Overlaps. Identifies device names (e.g., "MacBook") to ignore false matches. | **15.0** (High) |
+| **Calendar Match** | Invite Guest Lists | Matches participant identity against calendar attendee lists, assigning negative weight if matching an interviewer. | **20.0** (Critical) |
+| **Speech Pattern** | Voice telemetries | Tracks total speaking duration and segment counts. Boosts participants who speak the most (typical candidate behavior). | **10.0** (Medium) |
+| **Transcript** | Live spoken text | Scans for natural language context (e.g. self-introductions, resume references, job description queries). | **12.0** (High) |
+| **Behavioral** | Webcams, Toggles | Audits active webcam status (candidates keep webcams on; observers keep them off) and applies penalties for mid-call renaming. | **8.0** (Medium) |
+| **Temporal** | Timing, Join order | Analyzes meeting join sequence (interviewers usually join first; candidates join slightly before or on time). | **5.0** (Low) |
+| **LLM Reasoning** | Deep semantic text | Asynchronously parses transcripts for complex role confirmation (disabled in evaluation tests for speed and reproducibility). | **15.0** (High) |
 
 ---
 
-## 4. Project Structure
+## ─── 📐 CORE ENGINES & MATHEMATICAL FOUNDATION ───
+
+### 1. Bayesian Fusion Engine
+The system uses a **Log-Odds Bayesian Update** model to combine signals dynamically.
+* Every participant $i$ is initialized with a uniform prior probability:
+  $$P(C_i) = \frac{1}{N}$$
+* Where $N$ is the number of participants. The probability is converted into log-odds to prevent numerical underflow:
+  $$\text{Odds}(C_i) = \log\left(\frac{P(C_i)}{1 - P(C_i)}\right)$$
+* When an analyzer emits an `EvidenceItem` with a score $S \in [-1.0, 1.0]$ and weight $W$, we calculate the update factor:
+  $$\Delta_i = S \times W \times \text{Confidence}$$
+* The log-odds for participant $i$ is updated:
+  $$\text{Odds}(C_i) \leftarrow \text{Odds}(C_i) + \Delta_i$$
+* Log-odds are then converted back to normalized probabilities summing to $1.0$. This ensures that negative evidence for one participant naturally boosts the probability of other participants.
+
+### 2. Confidence Engine (Smoothing)
+Raw Bayesian probabilities can jump around due to sudden speech events. To prevent false triggers in downstream detectors, the **Confidence Engine** applies an **Exponential Moving Average (EMA)**:
+$$\overline{P}_t = \alpha P_t + (1 - \alpha) \overline{P}_{t-1}$$
+*(Where smoothing factor $\alpha = 0.25$, balancing speed of identification with noise reduction).*
+
+The smoothed confidence is classified into categorical levels:
+* **Very High** ($\ge 85\%$): Safe to lock detectors onto this candidate.
+* **High** ($60\% - 84\%$): Active candidate identified, awaiting verification.
+* **Medium** ($35\% - 59\%$): Weak match, high uncertainty.
+* **Low** ($< 35\%$): No candidate matching this profile.
+
+### 3. Explainability Engine
+Generates human-readable reasoning chains explaining **WHY** the system selected someone. It lists:
+- **Positive evidence** driving the decision.
+- **Negative evidence** (e.g. matching an interviewer name, sharing screens, or long silences).
+- **Uncertainty Factors**: Automatically flags reasons for concern (e.g., active participant using a generic device display name, falling confidence trends, or close secondary candidates).
+
+---
+
+## ─── 💻 TECH STACK ───
+
+* **Backend**: FastAPI, Pydantic v2 (Validation), Uvicorn, Websockets.
+* **Frontend**: React 18, TypeScript, Vite, Recharts (confidence charts), Vanilla CSS (Custom design system).
+* **Testing**: Pytest, Asyncio-based headless evaluator.
+* **Integrations**: Chrome Extension Manifest V3 (Google Meet Scraper).
+
+---
+
+## ─── 📁 PROJECT STRUCTURE ───
 
 ```
 TrueCandidate/
 ├── backend/
 │   ├── app/
-│   │   ├── api/                  # REST API & WebSocket handlers
-│   │   ├── config.py             # App configurations & signal weights
-│   │   ├── connectors/           # Meeting Connector adapters (Mock)
-│   │   ├── core/                 # Engine orchestrator & 7 signal analyzers
-│   │   ├── explainability/       # Reasoning & role inference generator
-│   │   ├── fusion/               # Bayesian evidence fusion engine
-│   │   ├── confidence/           # EMA confidence tracking
-│   │   └── models/               # Pydantic data schemas
-│   ├── evaluation/               # Headless simulation evaluation script
+│   │   ├── api/                  # REST Router & WebSocket connection manager
+│   │   ├── confidence/           # EMA Confidence tracking & trend analysis
+│   │   ├── connectors/           # Mock meeting event streams
+│   │   ├── core/                 # Orchestrator & 7 Signal Analyzers
+│   │   ├── explainability/       # Reasoning chain & role inference engine
+│   │   ├── fusion/               # Bayesian odds update logic
+│   │   ├── models/               # Pydantic schemas (events, predictions)
+│   │   ├── config.py             # Global config & signal weights
+│   │   └── main.py               # FastAPI entry point & WebSocket server
+│   ├── evaluation/               # Headless simulation evaluation suite
 │   ├── scenarios/                # 10 JSON replay scenario files
-│   └── tests/                    # Backend unit tests
+│   └── tests/                    # Unit tests for analyzers & engines
 ├── frontend/
 │   ├── src/
-│   │   ├── components/           # Dashboard panels & charts
+│   │   ├── components/           # Dashboard panels & line charts
 │   │   ├── hooks/                # WebSocket & state hooks
-│   │   └── types/                # TS type definitions
-│   └── index.html                # Main html entry
-├── docs/
-│   └── future_adapters.md        # Technical blueprint for real integrations
-└── README.md
+│   │   ├── types/                # TypeScript interfaces
+│   │   ├── utils/                # API client
+│   │   ├── App.tsx               # Root view
+│   │   └── index.css             # Premium Soft Dark design system
+│   └── index.html                # App entry
+├── chrome_extension/             # Chrome Extension (Google Meet Connector)
+└── docs/
+    ├── future_adapters.md        # Technical integration blueprints
+    └── demo_script.md            # Video recording script
 ```
 
 ---
 
-## 5. Installation & Setup
+## ─── 🚀 INSTALLATION & SETUP ───
 
-### Prerequisites
-- Python 3.10+
-- Node.js 18+
-
-### 1. Run the Backend
+### 1. Start the Backend API Server
 ```bash
-# Clone the repository
-git clone https://github.com/Sahilkewat80085/TrueCandidate.git
-cd TrueCandidate
-
-# Setup python environment
+# Navigate to the project root
 python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-
-# Install requirements
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r backend/requirements.txt
 
-# Run server (runs on http://localhost:8000)
+# Start the server (auto-resolves Python path)
 python backend/app/main.py
 ```
+*The server will start listening at [http://localhost:8000](http://localhost:8000).*
 
-### 2. Run the Frontend
+### 2. Start the Frontend Dashboard
 ```bash
 cd frontend
 npm install
-npm run dev  # runs on http://localhost:5173
+npm run dev
 ```
+*Open [http://localhost:5173](http://localhost:5173) in your browser.*
 
 ---
 
-## 6. Simulation & Scenarios
+## ─── 📊 WEB DASHBOARD WALK-THROUGH ───
 
-The backend comes pre-packaged with **10 realistic interview scenarios** that replay automatically at 5x speed for demonstration:
-
-1. **Everything Correct** (Easy): Perfect name match, normal turn-taking.
-2. **Nickname** (Medium): Candidate joins as `Sam` instead of `Samantha Patel`.
-3. **MacBook Pro** (Hard): Candidate joins as `MacBook Pro` but corrects name later.
-4. **Wrong Calendar Entry** (Hard): Calendar lists `John Smith`, actual candidate is `Jane Smith`.
-5. **Two Interviewers** (Medium): System identifies candidate among multiple interviewers.
-6. **Silent Observer** (Medium): Extra HR participant joins silently and is classified as observer.
-7. **Display Name Changed** (Medium): Candidate joins as generic `User123` and updates name later.
-8. **Candidate Joins Late** (Medium): Interviewers talk for 2 minutes before candidate joins late.
-9. **Camera Off Initially** (Medium): Candidate turns webcam on only after 50 seconds.
-10. **Ambiguous Identities** (Very Hard): Candidate `A. Kumar` must be distinguished from observer `Alex M`.
+The frontend features a **Premium Soft Tech Dark Theme** (designed to prevent eye strain during long sessions):
+1. **Scenario Selector (Left)**: Allows replaying any of the 10 pre-loaded scenarios at 5x speed.
+2. **Identified Candidate Card (Center Top)**: Displays the current candidate's name, inferred role, and smoothed confidence percentage.
+3. **Confidence Timeline Chart (Center)**: Real-time Recharts line graph mapping confidence progression for all participants simultaneously.
+4. **Participant Directory (Center Bottom)**: Shows active participants with role badges (🎯 candidate, 🎤 interviewer, 👁 observer) and real-time confidence scores.
+5. **Reasoning List (Center Bottom)**: Explains the exact mathematical impact ($+22$, $-15$) of the top evidence signals.
+6. **Telemetry Streams (Right)**: Shows the live event timeline and live speaker-attributed transcript feed side-by-side.
 
 ---
 
-## 7. Automated Evaluation
+## ─── 🔌 GOOGLE MEET CHROME EXTENSION CONNECTOR ───
 
-Run the evaluation script to test the accuracy and speed of identification across all 10 scenarios:
+We have implemented a lightweight **Manifest V3 Chrome Extension** in `chrome_extension/` that streams live Google Meet events to TrueCandidate.
+
+### Setup & Usage:
+1. Open Google Chrome and go to `chrome://extensions/`.
+2. Toggle on **Developer mode** in the top-right corner.
+3. Click **Load unpacked** and select the `chrome_extension/` folder in your project root.
+4. Join any Google Meet call (e.g. `https://meet.google.com/abc-defg-hij`).
+5. Open the Extension popup. The extension **automatically parses the Meet code** from the URL, queries the backend calendar registry, and pre-fills the candidate information (no typing required!).
+6. Click **Start Live Link**.
+7. The extension will scrape the Google Meet DOM (every 2.5s) to detect participant join/leave events and webcam states (via video elements presence) and stream them to `localhost:8000/api/meetings/{id}/event`. The dashboard will update in real time!
+
+---
+
+## ─── 🧪 HEADLESS EVALUATION & TEST RESULTS ───
+
+We have built a headless simulation script that replays all 10 scenarios instantly to measure overall accuracy and Speed-to-Identification (TTI).
+
+To run the evaluation:
 ```bash
 python backend/evaluation/evaluator.py
 ```
 
-### Results
+### Scenario Test Summary:
+* **Scenario 1: Everything Correct (Easy)**: Perfect name match, normal turn-taking. `TTI = 15s (100% Conf)`
+* **Scenario 2: Nickname (Medium)**: Candidate joins as "Sam" instead of "Samantha Patel". `TTI = 20s (100% Conf)`
+* **Scenario 3: MacBook Pro (Hard)**: Candidate joins as "MacBook Pro" but corrects name later. `TTI = 25s (100% Conf)`
+* **Scenario 4: Wrong Calendar Entry (Hard)**: Calendar lists "John Smith", actual candidate is "Jane Smith". `TTI = 18s (100% Conf)`
+* **Scenario 5: Two Interviewers (Medium)**: System identifies candidate among multiple interviewers. `TTI = 20s (100% Conf)`
+* **Scenario 6: Silent Observer (Medium)**: Extra HR participant joins silently and is classified as observer. `TTI = 18s (100% Conf)`
+* **Scenario 7: Display Name Changed (Medium)**: Candidate starts as generic "User123" and updates name later. `TTI = 22s (100% Conf)`
+* **Scenario 8: Candidate Joins Late (Medium)**: Interviewers talk for 2 minutes before candidate joins late. `TTI = 120s (100% Conf)`
+* **Scenario 9: Camera Off Initially (Medium)**: Candidate turns webcam on only after 50 seconds. `TTI = 20s (100% Conf)`
+* **Scenario 10: Ambiguous Identities (Very Hard)**: Candidate "A. Kumar" must be distinguished from observer "Alex M". `TTI = 51s (96% Conf)`
+
 ```
-======================================================================
-  TrueCandidate — Evaluation Report
-======================================================================
-
-  Running: Everything Correct... [PASS] 01_perfect_match: conf=100%, TTI=15s, events=35, evidence=63
-  Running: Candidate Uses Nickname... [PASS] 02_nickname: conf=100%, TTI=20s, events=23, evidence=32
-  Running: MacBook Pro Display Name... [PASS] 03_macbook_pro: conf=100%, TTI=25s, events=24, evidence=35
-  Running: Wrong Calendar Entry... [PASS] 04_wrong_calendar: conf=100%, TTI=18s, events=23, evidence=31
-  Running: Two Interviewers... [PASS] 05_two_interviewers: conf=100%, TTI=20s, events=28, evidence=49
-  Running: Silent Observer... [PASS] 06_silent_observer: conf=100%, TTI=18s, events=24, evidence=39
-  Running: Display Name Changed Mid-Meeting... [PASS] 07_name_change: conf=100%, TTI=22s, events=24, evidence=33
-  Running: Candidate Joins Late... [PASS] 08_late_joiner: conf=100%, TTI=120s, events=28, evidence=48
-  Running: Camera Off Initially... [PASS] 09_camera_off: conf=100%, TTI=20s, events=26, evidence=28
-  Running: Ambiguous Identities... [PASS] 10_ambiguous: conf=96%, TTI=51s, events=28, evidence=53
-
 ======================================================================
   Summary
 ======================================================================
@@ -211,41 +270,16 @@ python backend/evaluation/evaluator.py
   Avg Final Conf:     100%
   Avg Time to ID:     33s
   Scenarios with TTI: 10/10
+  Failed Scenarios:   None! [SUCCESS]
+======================================================================
 ```
 
 ---
 
-## 8. Tradeoffs & Future Work
+## ─── 🔄 FUTURE PRODUCTION ADAPTERS ───
 
-### Tradeoffs
-- **Heuristics vs ML Models**: We opted for a Bayesian Evidence Fusion engine rather than a neural network classification model. This makes the system extremely fast, lightweight, and 100% explainable without requiring offline training datasets.
-- **LLM Usage**: The LLM is used strictly asynchronously for transcript reasoning (summarizing and picking context clues) to prevent blocking the real-time event loop.
-
-### Future Work
-- Support for **Zoom Meeting SDK** and **Recall.ai** server-side bots (documented in [docs/future_adapters.md](file:///c:/Users/kkewa/OneDrive/Desktop/Projects/TrueCandidate/docs/future_adapters.md)).
-- Multi-language support in the Transcript Analyzer.
-- Continuous learning of analyzer weights using reinforcement learning from user corrections.
-
----
-
-## 9. Chrome Extension (Google Meet Connector)
-We have implemented the stretch goal: a lightweight Google Meet Chrome Extension located in the `chrome_extension/` directory.
-
-### What it does:
-- Allows inputting candidate name, email, and interviewer information.
-- Connects to Google Meet tabs and scans the DOM (every 2.5s) to detect participant join/leave events and webcam states.
-- Streams these events in real-time to the TrueCandidate server API (`POST /api/meetings/{id}/event`).
-- **NO audio or video capture** takes place on the client side, keeping it lightweight and private. The backend remains the single source of truth.
-
-### How to install & use:
-1. Open Google Chrome and navigate to `chrome://extensions/`.
-2. Enable **Developer mode** (toggle in the top-right corner).
-3. Click **Load unpacked** and select the `chrome_extension/` folder in your project root.
-4. Join any Google Meet call (`https://meet.google.com/...`).
-5. Click the extension icon in your toolbar, input the candidate details, and click **Start Live Link**.
-6. The dashboard will automatically reflect the live updates, showing the candidate classification in real time based on active webcam telemetry!
-
----
-
-## 10. Demo Video Script
-A professional, step-by-step video script for recording the 5-10 minute project walk-through is available in [docs/demo_script.md](file:///c:/Users/kkewa/OneDrive/Desktop/Projects/TrueCandidate/docs/demo_script.md).
+For production deployment, swap the simulated connector for a live media/event provider. These integrations are documented in detail in [docs/future_adapters.md](file:///c:/Users/kkewa/OneDrive/Desktop/Projects/TrueCandidate/docs/future_adapters.md):
+1. **Recall.ai API**:Unified bot to join calls, retrieve live speaker-attributed transcripts, and stream events.
+2. **Zoom Meeting SDK**: Server-side C++/NodeJS container bot to capture raw audio PCM streams for high-accuracy speaker attribution.
+3. **Google Meet API & Pub/Sub**: Google Cloud integration to receive webhook event feeds for spaces.
+4. **Microsoft Teams hosted media bots**: Graph communications service bot to retrieve live participant streams.
