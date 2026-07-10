@@ -1,61 +1,61 @@
 /* ==========================================================================
-   TrueCandidate Design System — Cyber Threat Intelligence Theme (Aggressive Black)
+   TrueCandidate Design System — Premium Minimalist Tech Theme (Soft Black)
    ========================================================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Strict Pure Black & Charcoal Palette */
-  --bg-primary: #000000;
-  --bg-secondary: #080808;
-  --bg-card: #0c0c0c;
-  --bg-card-hover: #121212;
-  --bg-glass: rgba(0, 0, 0, 0.7);
-  --bg-glass-hover: rgba(18, 18, 18, 0.8);
+  /* Premium Soft Black & Dark Slate Palette */
+  --bg-primary: #050505;
+  --bg-secondary: #0c0c0e;
+  --bg-card: #111113;
+  --bg-card-hover: #161619;
+  --bg-glass: rgba(12, 12, 14, 0.9);
+  --bg-glass-hover: rgba(22, 22, 25, 0.95);
 
-  /* High-Contrast Technical Borders */
-  --border-primary: #1c1c1c;
-  --border-secondary: #2c2c2c;
-  --border-accent: #00ff66; /* Matrix / Cyber Green */
-  --border-success: #00ff66;
-  --border-warning: #ffaa00;
-  --border-danger: #ff003c; /* Cyber Crimson */
+  /* Subtle, Soft Technical Borders (No High Contrast Lines) */
+  --border-primary: #1e1e24;
+  --border-secondary: #2d2d35;
+  --border-accent: #10b981; /* Soft Emerald Green */
+  --border-success: #10b981;
+  --border-warning: #d97706; /* Soft Tech Gold */
+  --border-danger: #e11d48; /* Soft Crimson Rose */
 
-  /* Text Colors */
-  --text-primary: #ffffff;
-  --text-secondary: #a0a0a0;
-  --text-tertiary: #606060;
-  --text-muted: #404040;
+  /* Muted Text Colors (Avoiding Stark Blinding White) */
+  --text-primary: #f1f5f9; /* Slate 100 */
+  --text-secondary: #94a3b8; /* Slate 400 */
+  --text-tertiary: #64748b; /* Slate 500 */
+  --text-muted: #475569; /* Slate 600 */
 
   /* Cybernetic Accent Colors */
-  --accent-primary: #00ff66;
-  --accent-primary-light: #52ff94;
-  --accent-primary-dark: #00993d;
-  --accent-secondary: #00e5ff; /* Electric Cyan */
-  --accent-tertiary: #ffffff;
+  --accent-primary: #10b981;
+  --accent-primary-light: #34d399;
+  --accent-primary-dark: #047857;
+  --accent-secondary: #3b82f6; /* Soft Tech Blue */
+  --accent-tertiary: #cbd5e1;
 
-  /* Semantic Alert Colors */
-  --success: #00ff66;
-  --success-light: #52ff94;
-  --success-bg: rgba(0, 255, 102, 0.03);
+  /* Semantic Alert Colors (Muted BGs) */
+  --success: #10b981;
+  --success-light: #34d399;
+  --success-bg: rgba(16, 185, 129, 0.04);
   
-  --warning: #ffaa00;
-  --warning-light: #ffc43d;
-  --warning-bg: rgba(255, 170, 0, 0.03);
+  --warning: #d97706;
+  --warning-light: #fbbf24;
+  --warning-bg: rgba(217, 119, 6, 0.04);
   
-  --danger: #ff003c;
-  --danger-light: #ff4d73;
-  --danger-bg: rgba(255, 0, 60, 0.03);
+  --danger: #e11d48;
+  --danger-light: #fb7185;
+  --danger-bg: rgba(225, 29, 72, 0.04);
   
-  --info: #00e5ff;
-  --info-light: #66efff;
-  --info-bg: rgba(0, 229, 255, 0.03);
+  --info: #3b82f6;
+  --info-light: #60a5fa;
+  --info-bg: rgba(59, 130, 246, 0.04);
 
-  /* Confidence Colors */
-  --conf-very-high: #00ff66;
-  --conf-high: #00e5ff;
-  --conf-medium: #ffaa00;
-  --conf-low: #ff003c;
+  /* Confidence Level Colors */
+  --conf-very-high: #10b981;
+  --conf-high: #3b82f6;
+  --conf-medium: #d97706;
+  --conf-low: #e11d48;
 
   /* Typography */
   --font-sans: 'Inter', -apple-system, sans-serif;
@@ -76,10 +76,10 @@
   --radius-xl: 0px;
   --radius-full: 0px;
 
-  /* Fast, Aggressive UI Transitions */
-  --transition-fast: 50ms ease-out;
-  --transition-base: 100ms ease-out;
-  --transition-slow: 150ms ease-out;
+  /* Soft, Subtle UI Transitions */
+  --transition-fast: 80ms ease-out;
+  --transition-base: 150ms ease-out;
+  --transition-slow: 200ms ease-out;
 }
 
 /* Reset & Base */
@@ -105,7 +105,7 @@ body {
 }
 
 /* ==========================================================================
-   Utility Classes & Cyber Grid System
+   Utility Classes & Design Polish
    ========================================================================== */
 
 .glass {
@@ -120,14 +120,14 @@ body {
   position: relative;
 }
 
-/* Aggressive Cyber Corner Markers */
+/* Minimal Corner Frame Markers */
 .glass-card::after {
   content: '';
   position: absolute;
   top: -1px;
   left: -1px;
-  width: 4px;
-  height: 4px;
+  width: 3px;
+  height: 3px;
   border-top: 1px solid var(--text-muted);
   border-left: 1px solid var(--text-muted);
 }
@@ -137,8 +137,8 @@ body {
   position: absolute;
   bottom: -1px;
   right: -1px;
-  width: 4px;
-  height: 4px;
+  width: 3px;
+  height: 3px;
   border-bottom: 1px solid var(--text-muted);
   border-right: 1px solid var(--text-muted);
 }
@@ -155,7 +155,7 @@ body {
   color: var(--text-primary);
   font-family: var(--font-mono);
   font-weight: 700;
-  letter-spacing: -0.05em;
+  letter-spacing: -0.02em;
   text-transform: uppercase;
 }
 
@@ -188,7 +188,7 @@ body {
 }
 
 .app-logo h1 {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 700;
   font-family: var(--font-mono);
   letter-spacing: 0.05em;
@@ -226,13 +226,13 @@ body {
   font-weight: 600;
   text-transform: uppercase;
   border: 1px solid var(--border-primary);
-  background: #060606;
+  background: #09090b;
 }
 
 .status-badge.active {
   border-color: var(--border-success);
   color: var(--success-light);
-  background: rgba(0, 255, 102, 0.02);
+  background: rgba(16, 185, 129, 0.02);
 }
 
 .status-badge.idle {
@@ -241,8 +241,8 @@ body {
 }
 
 .status-dot {
-  width: 5px;
-  height: 5px;
+  width: 4px;
+  height: 4px;
 }
 
 .status-dot.active {
@@ -289,19 +289,19 @@ body {
 .scenario-card {
   padding: var(--space-md);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all var(--transition-base);
   margin-bottom: 6px;
   border: 1px solid var(--border-primary);
-  background: #050505;
+  background: #09090b;
 }
 
 .scenario-card:hover {
-  background: #0d0d0d;
+  background: #141417;
   border-color: var(--border-secondary);
 }
 
 .scenario-card.active {
-  background: #101010;
+  background: #18181b;
   border-color: var(--border-accent);
 }
 
@@ -316,7 +316,7 @@ body {
 .scenario-card .scenario-desc {
   font-size: 0.7rem;
   color: var(--text-secondary);
-  line-height: 1.3;
+  line-height: 1.35;
 }
 
 .scenario-card .scenario-badge {
@@ -333,7 +333,7 @@ body {
 .badge-easy { background: transparent; color: var(--success-light); border-color: var(--border-success); }
 .badge-medium { background: transparent; color: var(--warning-light); border-color: var(--border-warning); }
 .badge-hard { background: transparent; color: var(--danger-light); border-color: var(--border-danger); }
-.badge-very_hard { background: transparent; color: #d8b4fe; border-color: #a855f7; }
+.badge-very_hard { background: transparent; color: #c084fc; border-color: #a855f7; }
 
 /* ==========================================================================
    Center Panel
@@ -400,7 +400,7 @@ body {
   font-family: var(--font-mono);
   font-weight: 700;
   color: var(--accent-primary);
-  background: #080808;
+  background: #0c0c0e;
   flex-shrink: 0;
 }
 
@@ -439,7 +439,7 @@ body {
 .confidence-bar {
   width: 100%;
   height: 4px;
-  background: #111;
+  background: #18181b;
   border-radius: 0;
   margin-top: var(--space-md);
   overflow: hidden;
@@ -448,6 +448,7 @@ body {
 .confidence-fill {
   height: 100%;
   border-radius: 0;
+  transition: width var(--transition-base);
 }
 
 .confidence-fill.very_high { background: var(--conf-very-high); }
@@ -492,7 +493,7 @@ body {
 
 .participant-card.is-candidate {
   border-color: var(--border-accent);
-  background: #0f1c14; /* Deep dark tech green tint */
+  background: #0c1c14; /* Muted Emerald Tint */
 }
 
 .participant-left {
@@ -512,11 +513,11 @@ body {
   font-family: var(--font-mono);
   font-weight: 700;
   color: white;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.08);
 }
 
-.participant-avatar.candidate { background: #00ff66; color: #000; border-color: #00ff66; }
-.participant-avatar.interviewer { background: #111; color: #00e5ff; border-color: #00e5ff; }
+.participant-avatar.candidate { background: var(--accent-primary); color: #000; border-color: var(--accent-primary); }
+.participant-avatar.interviewer { background: #111; color: var(--accent-secondary); border-color: var(--accent-secondary); }
 .participant-avatar.observer { background: #111; color: var(--text-tertiary); border-color: var(--text-muted); }
 .participant-avatar.unknown { background: #111; color: var(--text-secondary); }
 
@@ -552,7 +553,7 @@ body {
   gap: var(--space-md);
   padding: var(--space-md);
   border: 1px dashed var(--border-primary);
-  background: #040404;
+  background: #09090b;
   margin-bottom: 4px;
 }
 
@@ -573,7 +574,7 @@ body {
 .reason-text {
   font-size: 0.75rem;
   color: var(--text-secondary);
-  line-height: 1.3;
+  line-height: 1.35;
 }
 
 .reason-impact {
@@ -584,8 +585,8 @@ body {
   border: 1px solid transparent;
 }
 
-.reason-impact.positive { color: var(--success); border-color: rgba(0, 255, 102, 0.2); }
-.reason-impact.negative { color: var(--danger); border-color: rgba(255, 0, 60, 0.2); }
+.reason-impact.positive { color: var(--success-light); border-color: rgba(16, 185, 129, 0.15); }
+.reason-impact.negative { color: var(--danger-light); border-color: rgba(225, 29, 72, 0.15); }
 
 /* ==========================================================================
    Confidence Chart
@@ -625,7 +626,7 @@ body {
   gap: var(--space-md);
   padding: 6px 0;
   font-size: 0.7rem;
-  border-bottom: 1px solid #111;
+  border-bottom: 1px solid #141416;
 }
 
 .evidence-time {
@@ -656,7 +657,7 @@ body {
 /* Transcript */
 .transcript-item {
   padding: var(--space-sm) 0;
-  border-bottom: 1px dashed #111;
+  border-bottom: 1px dashed #141416;
 }
 
 .transcript-meta {
@@ -722,7 +723,7 @@ body {
   min-height: 200px;
   text-align: center;
   border: 1px dashed var(--border-primary);
-  background: #030303;
+  background: #08080a;
 }
 
 .empty-state .empty-icon {
@@ -756,8 +757,8 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1c1c1c;
+  background: #1f1f24;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #2c2c2c;
+  background: #2f2f37;
 }
