@@ -228,5 +228,24 @@ python backend/evaluation/evaluator.py
 
 ---
 
-## 9. Demo Video Script
+## 9. Chrome Extension (Google Meet Connector)
+We have implemented the stretch goal: a lightweight Google Meet Chrome Extension located in the `chrome_extension/` directory.
+
+### What it does:
+- Allows inputting candidate name, email, and interviewer information.
+- Connects to Google Meet tabs and scans the DOM (every 2.5s) to detect participant join/leave events and webcam states.
+- Streams these events in real-time to the TrueCandidate server API (`POST /api/meetings/{id}/event`).
+- **NO audio or video capture** takes place on the client side, keeping it lightweight and private. The backend remains the single source of truth.
+
+### How to install & use:
+1. Open Google Chrome and navigate to `chrome://extensions/`.
+2. Enable **Developer mode** (toggle in the top-right corner).
+3. Click **Load unpacked** and select the `chrome_extension/` folder in your project root.
+4. Join any Google Meet call (`https://meet.google.com/...`).
+5. Click the extension icon in your toolbar, input the candidate details, and click **Start Live Link**.
+6. The dashboard will automatically reflect the live updates, showing the candidate classification in real time based on active webcam telemetry!
+
+---
+
+## 10. Demo Video Script
 A professional, step-by-step video script for recording the 5-10 minute project walk-through is available in [docs/demo_script.md](file:///c:/Users/kkewa/OneDrive/Desktop/Projects/TrueCandidate/docs/demo_script.md).

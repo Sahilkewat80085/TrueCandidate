@@ -7,6 +7,7 @@ from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
+from backend.app.models.events import CalendarMetadata, MeetingEvent
 
 logger = logging.getLogger(__name__)
 
@@ -156,3 +157,48 @@ async def list_meetings():
     from backend.app.main import app_state
 
     return {"meetings": app_state.session_manager.list_active_sessions()}
+
+
+class StartCustomMeetingResponse(BaseModel):
+    meeting_id: str
+    message: str
+
+
+@router.post("/start_custom", response_model=StartCustomMeetingResponse)
+async def start_custom_meeting(calendar: CalendarMetadata):
+    """Start an empty custom live meeting session."""
+    from backend.app.main import app_state
+
+    try:
+        meeting_id = await app_state.session_manager.start_custom_meeting(
+            calendar=calendar,
+            update_callback=app_state.on_meeting_update,
+        )
+        return StartCustomMeetingResponse(
+            meeting_id=meeting_id,
+            message="Custom live meeting session initialized successfully",
+        )
+    except Exception as e:
+        logger.error(f"Failed to start custom meeting: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/{meeting_id}/event")
+async def push_event(meeting_id: str, event: MeetingEvent):
+    """Push a normalized live meeting event (e.g. from Chrome Extension)."""
+    from backend.app.main import app_state
+
+    session = app_state.session_manager.get_session(meeting_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="Meeting session not found")
+
+    try:
+        engine = session["engine"]
+        prediction = engine.process_event(event)
+        session["events"].append(event)
+        if prediction:
+            session["predictions"].append(prediction)
+        return {"status": "success", "prediction": prediction}
+    except Exception as e:
+        logger.error(f"Failed to process pushed event for {meeting_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))

@@ -11,7 +11,7 @@ from typing import Callable, Optional
 from backend.app.config import AppConfig
 from backend.app.connectors.mock_connector import MockMeetingConnector, list_scenarios
 from backend.app.core.engine import IdentificationEngine
-from backend.app.models.events import MeetingEvent
+from backend.app.models.events import MeetingEvent, CalendarMetadata
 from backend.app.models.prediction import CandidatePrediction
 
 logger = logging.getLogger(__name__)
@@ -87,6 +87,49 @@ class MeetingSessionManager:
         logger.info(f"Started scenario '{scenario_id}' as meeting '{meeting_id}'")
         return meeting_id
 
+    async def start_custom_meeting(
+        self,
+        calendar: CalendarMetadata,
+        update_callback: Optional[Callable] = None,
+    ) -> str:
+        """Start an empty custom meeting session to accept live external events."""
+        meeting_id = f"live_{uuid.uuid4().hex[:8]}"
+
+        # Create engine
+        engine = IdentificationEngine(self.config)
+        engine.meeting_id = meeting_id
+        engine.set_calendar(calendar)
+
+        # Store session
+        self._sessions[meeting_id] = {
+            "connector": None,  # Externally pushed
+            "engine": engine,
+            "scenario_id": "live_meet",
+            "scenario_meta": {
+                "scenario_id": "live_meet",
+                "title": "Live Google Meet",
+                "description": "Streaming events directly from Google Meet Chrome Extension",
+                "difficulty": "live",
+            },
+            "task": None,
+            "update_callback": update_callback,
+            "events": [],
+            "predictions": [],
+        }
+
+        # Register engine callback
+        if update_callback:
+            def sync_wrapper(pred, evt, evid):
+                try:
+                    loop = asyncio.get_running_loop()
+                    loop.create_task(update_callback(meeting_id, pred, evt, evid))
+                except RuntimeError:
+                    pass
+            engine.on_update(sync_wrapper)
+
+        logger.info(f"Started custom live meeting: {meeting_id}")
+        return meeting_id
+
     async def _run_session(self, meeting_id: str) -> None:
         """Run a meeting session — process events from connector through engine."""
         session = self._sessions.get(meeting_id)
@@ -116,7 +159,8 @@ class MeetingSessionManager:
             return
 
         connector = session["connector"]
-        await connector.stop()
+        if connector:
+            await connector.stop()
 
         task = session.get("task")
         if task and not task.done():
@@ -152,7 +196,7 @@ class MeetingSessionManager:
                 "meeting_id": mid,
                 "scenario_id": session["scenario_id"],
                 "scenario_meta": session["scenario_meta"],
-                "is_active": session["connector"].is_active(),
+                "is_active": session["connector"].is_active() if session["connector"] else True,
                 "event_count": len(session["events"]),
             })
         return result
