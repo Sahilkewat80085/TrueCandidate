@@ -29,6 +29,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   else if (message.type === "MEET_EVENT" && activeMeetingId) {
+    // Verify sender tab is actually Google Meet to prevent spoofing
+    if (!sender.tab || !sender.tab.url || !sender.tab.url.startsWith("https://meet.google.com/")) {
+      console.warn("[Background] Security warning: rejected message from unauthorized tab or context.");
+      return;
+    }
+
     // Inject timestamp if not provided (seconds since start)
     const timestamp = startTime ? (Date.now() - startTime) / 1000 : 0;
     const eventPayload = {

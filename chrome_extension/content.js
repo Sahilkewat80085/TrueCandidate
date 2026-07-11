@@ -159,17 +159,38 @@ function scrapeMeetDOM() {
   previousParticipants = currentParticipants;
 }
 
+function escapeHTML(str) {
+  if (typeof str !== 'string') return str;
+  return str.replace(/[&<>'"]/g, 
+    tag => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[tag] || tag)
+  );
+}
+
 /**
  * Sends a meeting event to the background script.
  */
 function emitEvent(eventType, participantId, data = {}) {
+  // Sanitize both key and string value to protect against script injection
+  const sanitizedData = {};
+  for (const [key, value] of Object.entries(data)) {
+    const safeKey = escapeHTML(key);
+    const safeValue = typeof value === 'string' ? escapeHTML(value) : value;
+    sanitizedData[safeKey] = safeValue;
+  }
+
   const event = {
     event_type: eventType,
-    participant_id: participantId,
-    data: data
+    participant_id: escapeHTML(participantId),
+    data: sanitizedData
   };
 
-  console.log(`[TrueCandidate] Emitting event: ${eventType} for ${participantId}`, data);
+  console.log(`[TrueCandidate] Emitting event: ${eventType} for ${participantId}`, sanitizedData);
   
   chrome.runtime.sendMessage({
     type: "MEET_EVENT",

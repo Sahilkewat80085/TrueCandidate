@@ -13,6 +13,9 @@
     "https://meet.google.com/*",
     "http://localhost:8000/*"
   ],
+  "content_security_policy": {
+    "extension_pages": "default-src 'self'; connect-src 'self' http://localhost:8000; script-src 'self'; style-src 'self' 'unsafe-inline';"
+  },
   "action": {
     "default_popup": "popup.html"
   },
