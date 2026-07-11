@@ -16,10 +16,14 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 import asyncio
 import logging
+import time
+from collections import defaultdict
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import Response
 
 from backend.app.api.routes import health, meetings, scenarios
 from backend.app.api.websocket import ws_manager
@@ -75,12 +79,52 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS
+# IP-based rate limiter storage
+RATE_LIMIT_WINDOWS = defaultdict(list)
+
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        return response
+
+
+class RateLimitingMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        # Exclude root and health checks from rate limiting
+        if request.url.path in ["/health", "/", "/docs", "/openapi.json"]:
+            return await call_next(request)
+
+        client_ip = request.client.host if request.client else "unknown"
+        now = time.time()
+
+        # Prune older requests (last 60s)
+        timestamps = RATE_LIMIT_WINDOWS[client_ip]
+        RATE_LIMIT_WINDOWS[client_ip] = [t for t in timestamps if now - t < 60.0]
+
+        if len(RATE_LIMIT_WINDOWS[client_ip]) >= 100:
+            return Response(
+                "Too many requests. Limit 100 requests per minute.", 
+                status_code=429
+            )
+
+        RATE_LIMIT_WINDOWS[client_ip].append(now)
+        return await call_next(request)
+
+
+app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(RateLimitingMiddleware)
+
+# CORS (Restricted to configured hostnames, no wildcard allowed in credentials mode)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=app_state.config.cors_origins + ["*"],
+    allow_origins=app_state.config.cors_origins if app_state.config.cors_origins else ["http://localhost:5173", "http://127.0.0.1:5173"],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
 
