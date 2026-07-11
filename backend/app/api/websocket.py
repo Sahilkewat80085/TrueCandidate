@@ -18,13 +18,41 @@ class ConnectionManager:
     def __init__(self):
         self._connections: dict[str, list[WebSocket]] = {}  # meeting_id -> connections
 
-    async def connect(self, websocket: WebSocket, meeting_id: str) -> None:
+    async def connect(self, websocket: WebSocket, meeting_id: str) -> bool:
         """Accept a new WebSocket connection for a meeting."""
+        # 1. Validate meeting_id format
+        import re
+        if not re.match(r"^[a-zA-Z0-9_-]{1,64}$", meeting_id):
+            logger.warning(f"WebSocket rejected: invalid meeting ID format: {meeting_id}")
+            await websocket.close(code=4003)
+            return False
+
+        # 2. Check Origin header to prevent CSWSH
+        origin = websocket.headers.get("origin")
+        if origin:
+            is_valid = (
+                "localhost" in origin 
+                or "127.0.0.1" in origin 
+                or origin.startswith("chrome-extension://")
+            )
+            if not is_valid:
+                logger.warning(f"WebSocket rejected due to unauthorized origin: {origin}")
+                await websocket.close(code=4008)
+                return False
+
+        # 3. Limit concurrent connections per meeting ID to prevent resource exhaustion (DoS)
+        current_connections = len(self._connections.get(meeting_id, []))
+        if current_connections >= 10:
+            logger.warning(f"WebSocket rejected for {meeting_id}: connection limit exceeded (max 10)")
+            await websocket.close(code=4029)  # Rate Limit close code
+            return False
+
         await websocket.accept()
         if meeting_id not in self._connections:
             self._connections[meeting_id] = []
         self._connections[meeting_id].append(websocket)
         logger.info(f"WebSocket connected for meeting {meeting_id} (total: {len(self._connections[meeting_id])})")
+        return True
 
     def disconnect(self, websocket: WebSocket, meeting_id: str) -> None:
         """Remove a WebSocket connection."""

@@ -94,7 +94,12 @@ app.include_router(scenarios.router)
 @app.websocket("/ws/{meeting_id}")
 async def websocket_endpoint(websocket: WebSocket, meeting_id: str):
     """WebSocket for real-time meeting updates."""
-    await ws_manager.connect(websocket, meeting_id)
+    connected = await ws_manager.connect(websocket, meeting_id)
+    if not connected:
+        return
+
+    import time
+    message_timestamps = []
 
     try:
         # Send initial state if session exists
@@ -109,6 +114,16 @@ async def websocket_endpoint(websocket: WebSocket, meeting_id: str):
         while True:
             try:
                 data = await websocket.receive_text()
+                
+                # Enforce message rate limiting (max 60 messages per minute)
+                now = time.time()
+                message_timestamps = [t for t in message_timestamps if now - t < 60.0]
+                if len(message_timestamps) >= 60:
+                    logger.warning(f"WebSocket client exceeded rate limit on {meeting_id}")
+                    await websocket.close(code=4029)
+                    break
+                message_timestamps.append(now)
+
                 # Client can send commands (e.g., request current state)
                 if data == "ping":
                     await ws_manager.send_personal(websocket, {"type": "pong"})
