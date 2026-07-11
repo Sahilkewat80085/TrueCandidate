@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Query
@@ -12,6 +13,18 @@ from backend.app.models.events import CalendarMetadata, MeetingEvent
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/meetings", tags=["meetings"])
+
+# Regular expressions for parameter validation
+MEETING_ID_PATTERN = re.compile(r"^[a-zA-Z0-9_-]{1,64}$")
+MEETING_CODE_PATTERN = re.compile(r"^[a-z]{3}-[a-z]{4}-[a-z]{3}$")
+
+def validate_meeting_id(meeting_id: str) -> None:
+    if not MEETING_ID_PATTERN.match(meeting_id):
+        raise HTTPException(status_code=400, detail="Invalid meeting ID format")
+
+def validate_meeting_code(meeting_code: str) -> None:
+    if not MEETING_CODE_PATTERN.match(meeting_code.lower()):
+        raise HTTPException(status_code=400, detail="Invalid meeting code format")
 
 
 # Mock Database matching Google Meet codes to Candidate Calendar details
@@ -40,6 +53,7 @@ CALENDAR_REGISTRY = {
 @router.get("/calendar/{meeting_code}", response_model=CalendarMetadata)
 async def get_calendar_by_code(meeting_code: str):
     """Retrieve candidate calendar metadata automatically based on the Google Meet code."""
+    validate_meeting_code(meeting_code)
     # Lookup in registry, default to a fallback candidate if code not registered
     data = CALENDAR_REGISTRY.get(meeting_code.lower())
     if not data:
@@ -69,6 +83,10 @@ async def start_scenario(request: StartScenarioRequest):
     """Start a scenario simulation."""
     from backend.app.main import app_state
 
+    # Sanitize scenario_id to prevent directory traversal
+    if not re.match(r"^[a-zA-Z0-9_-]+$", request.scenario_id):
+        raise HTTPException(status_code=400, detail="Invalid scenario ID format")
+
     try:
         meeting_id = await app_state.session_manager.start_scenario(
             scenario_id=request.scenario_id,
@@ -90,6 +108,7 @@ async def start_scenario(request: StartScenarioRequest):
 @router.post("/{meeting_id}/stop")
 async def stop_meeting(meeting_id: str):
     """Stop an active meeting session."""
+    validate_meeting_id(meeting_id)
     from backend.app.main import app_state
 
     await app_state.session_manager.stop_session(meeting_id)
@@ -99,6 +118,7 @@ async def stop_meeting(meeting_id: str):
 @router.get("/{meeting_id}/prediction")
 async def get_prediction(meeting_id: str):
     """Get current candidate prediction."""
+    validate_meeting_id(meeting_id)
     from backend.app.main import app_state
 
     prediction = app_state.session_manager.get_prediction(meeting_id)
@@ -110,6 +130,7 @@ async def get_prediction(meeting_id: str):
 @router.get("/{meeting_id}/confidence-timeline")
 async def get_confidence_timeline(meeting_id: str):
     """Get the full confidence timeline for a meeting."""
+    validate_meeting_id(meeting_id)
     from backend.app.main import app_state
 
     engine = app_state.session_manager.get_engine(meeting_id)
@@ -123,6 +144,7 @@ async def get_confidence_timeline(meeting_id: str):
 @router.get("/{meeting_id}/explanation")
 async def get_explanation(meeting_id: str):
     """Get detailed explanation for the current prediction."""
+    validate_meeting_id(meeting_id)
     from backend.app.main import app_state
 
     prediction = app_state.session_manager.get_prediction(meeting_id)
@@ -135,6 +157,7 @@ async def get_explanation(meeting_id: str):
 @router.get("/{meeting_id}/participants")
 async def get_participants(meeting_id: str):
     """Get all participants with their current scores."""
+    validate_meeting_id(meeting_id)
     from backend.app.main import app_state
 
     engine = app_state.session_manager.get_engine(meeting_id)
@@ -161,6 +184,7 @@ async def get_participants(meeting_id: str):
 @router.get("/{meeting_id}/events")
 async def get_events(meeting_id: str, limit: int = Query(50, ge=1, le=500)):
     """Get recent meeting events."""
+    validate_meeting_id(meeting_id)
     from backend.app.main import app_state
 
     session = app_state.session_manager.get_session(meeting_id)
@@ -178,6 +202,7 @@ async def get_events(meeting_id: str, limit: int = Query(50, ge=1, le=500)):
 @router.get("/{meeting_id}/transcript")
 async def get_transcript(meeting_id: str):
     """Get the full transcript."""
+    validate_meeting_id(meeting_id)
     from backend.app.main import app_state
 
     engine = app_state.session_manager.get_engine(meeting_id)
@@ -225,6 +250,7 @@ async def start_custom_meeting(calendar: CalendarMetadata):
 @router.post("/{meeting_id}/event")
 async def push_event(meeting_id: str, event: MeetingEvent):
     """Push a normalized live meeting event (e.g. from Chrome Extension)."""
+    validate_meeting_id(meeting_id)
     from backend.app.main import app_state
 
     session = app_state.session_manager.get_session(meeting_id)
