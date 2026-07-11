@@ -16,6 +16,8 @@ export const TranscriptPanel: React.FC<Props> = ({ transcript, candidateId, part
     }
   }, [transcript.length]);
 
+  // React's JSX auto-escapes string variables to prevent Cross-Site Scripting (XSS).
+  // We defensively display a slice of the most recent 30 transcript entries.
   const recent = transcript.slice(-30);
 
   return (
