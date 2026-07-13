@@ -64,18 +64,24 @@ class ConnectionManager:
         logger.info(f"WebSocket disconnected for meeting {meeting_id}")
 
     async def broadcast(self, meeting_id: str, message: dict) -> None:
-        """Broadcast a message to all connected clients for a meeting."""
+        """Broadcast a message to all connected clients for a meeting concurrently."""
         if meeting_id not in self._connections:
             return
 
-        disconnected = []
         data = json.dumps(message, default=str)
+        websockets = self._connections[meeting_id]
 
-        for ws in self._connections[meeting_id]:
+        async def send_to_ws(ws: WebSocket) -> Optional[WebSocket]:
             try:
                 await ws.send_text(data)
+                return None
             except Exception:
-                disconnected.append(ws)
+                return ws
+
+        # Send to all sockets concurrently to prevent slow connections from holding up others
+        results = await asyncio.gather(*(send_to_ws(ws) for ws in websockets), return_exceptions=True)
+
+        disconnected = [ws for ws in results if isinstance(ws, WebSocket)]
 
         # Clean up disconnected
         for ws in disconnected:
