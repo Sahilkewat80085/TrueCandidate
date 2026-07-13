@@ -10,6 +10,7 @@ Uses multiple string similarity algorithms:
 
 from __future__ import annotations
 
+import functools
 import re
 from typing import Optional
 
@@ -24,6 +25,7 @@ def _normalize(name: str) -> str:
     return re.sub(r'[^a-z0-9\s]', '', name.lower().strip())
 
 
+@functools.lru_cache(maxsize=512)
 def _levenshtein_ratio(s1: str, s2: str) -> float:
     """Compute Levenshtein similarity ratio (0 to 1)."""
     if not s1 or not s2:
@@ -53,6 +55,7 @@ def _levenshtein_ratio(s1: str, s2: str) -> float:
     return 1.0 - dist[rows - 1][cols - 1] / max_len
 
 
+@functools.lru_cache(maxsize=512)
 def _token_overlap(name1: str, name2: str) -> float:
     """Compute token overlap ratio between two names."""
     tokens1 = set(_normalize(name1).split())
