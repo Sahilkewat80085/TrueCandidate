@@ -186,8 +186,15 @@ class MockMeetingConnector(MeetingConnector):
             return None
 
 
+_SCENARIO_CACHE: list[dict] = []
+
+
 def list_scenarios(scenario_dir: str = "scenarios") -> list[dict]:
-    """List all available scenario files."""
+    """List all available scenario files with in-memory caching."""
+    global _SCENARIO_CACHE
+    if _SCENARIO_CACHE:
+        return _SCENARIO_CACHE
+
     path = Path(scenario_dir)
     scenarios = []
 
@@ -207,4 +214,5 @@ def list_scenarios(scenario_dir: str = "scenarios") -> list[dict]:
         except Exception as e:
             logger.warning(f"Failed to load scenario {f}: {e}")
 
+    _SCENARIO_CACHE = scenarios
     return scenarios
