@@ -45,6 +45,17 @@ INTERVIEWER_PATTERNS = [
     (r"(?:(?:next|final) (?:question|round|step))", "interview_structure", 0.6),
 ]
 
+# Compile patterns on module import to optimize matching performance
+CANDIDATE_PATTERNS_COMPILED = [
+    (re.compile(pat, re.IGNORECASE), name, conf)
+    for pat, name, conf in CANDIDATE_PATTERNS
+]
+
+INTERVIEWER_PATTERNS_COMPILED = [
+    (re.compile(pat, re.IGNORECASE), name, conf)
+    for pat, name, conf in INTERVIEWER_PATTERNS
+]
+
 
 class TranscriptAnalyzer(BaseAnalyzer):
     """Analyzes transcript content for candidate identity clues."""
@@ -83,8 +94,8 @@ class TranscriptAnalyzer(BaseAnalyzer):
         participant.transcript_word_count += len(text.split())
 
         # Check candidate patterns
-        for pattern, pattern_name, base_confidence in CANDIDATE_PATTERNS:
-            match = re.search(pattern, text_lower)
+        for pattern_obj, pattern_name, base_confidence in CANDIDATE_PATTERNS_COMPILED:
+            match = pattern_obj.search(text_lower)
             if match:
                 # Check if self-introduction name matches candidate
                 extra_boost = 0.0
@@ -109,8 +120,8 @@ class TranscriptAnalyzer(BaseAnalyzer):
                 ))
 
         # Check interviewer patterns
-        for pattern, pattern_name, base_confidence in INTERVIEWER_PATTERNS:
-            match = re.search(pattern, text_lower)
+        for pattern_obj, pattern_name, base_confidence in INTERVIEWER_PATTERNS_COMPILED:
+            match = pattern_obj.search(text_lower)
             if match:
                 evidence.append(EvidenceItem(
                     signal_type=SignalType.TRANSCRIPT_EVIDENCE,
