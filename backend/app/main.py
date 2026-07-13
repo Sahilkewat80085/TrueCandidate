@@ -102,17 +102,27 @@ class RateLimitingMiddleware(BaseHTTPMiddleware):
         client_ip = request.client.host if request.client else "unknown"
         now = time.time()
 
+        # Clean up stale keys in registry (lightweight inline GC on 5% of requests)
+        import random
+        if random.random() < 0.05:
+            stale_ips = [ip for ip, times in RATE_LIMIT_WINDOWS.items() if not any(now - t < 60.0 for t in times)]
+            for ip in stale_ips:
+                RATE_LIMIT_WINDOWS.pop(ip, None)
+
         # Prune older requests (last 60s)
         timestamps = RATE_LIMIT_WINDOWS[client_ip]
-        RATE_LIMIT_WINDOWS[client_ip] = [t for t in timestamps if now - t < 60.0]
+        active_timestamps = [t for t in timestamps if now - t < 60.0]
 
-        if len(RATE_LIMIT_WINDOWS[client_ip]) >= 100:
+        if len(active_timestamps) >= 100:
             return Response(
                 "Too many requests. Limit 100 requests per minute.", 
                 status_code=429
             )
 
-        RATE_LIMIT_WINDOWS[client_ip].append(now)
+        if not active_timestamps:
+            RATE_LIMIT_WINDOWS[client_ip] = [now]
+        else:
+            RATE_LIMIT_WINDOWS[client_ip] = active_timestamps + [now]
         return await call_next(request)
 
 
