@@ -57,18 +57,16 @@ class SpeechPatternAnalyzer(BaseAnalyzer):
 
         self._last_analysis_time = event.timestamp
 
-        # Need at least 2 participants who have spoken
-        speaking_participants = {
-            pid: p for pid, p in participants.items()
-            if p.total_speaking_duration > 0 and p.is_active
-        }
+        # Calculate speaking stats in a single pass for optimal performance
+        speaking_participants = {}
+        total_duration = 0.0
+        
+        for p_id, p in participants.items():
+            if p.is_active and p.total_speaking_duration > 0:
+                speaking_participants[p_id] = p
+                total_duration += p.total_speaking_duration
 
-        if len(speaking_participants) < 2:
-            return evidence
-
-        # Calculate speaking stats
-        total_duration = sum(p.total_speaking_duration for p in speaking_participants.values())
-        if total_duration == 0:
+        if len(speaking_participants) < 2 or total_duration == 0.0:
             return evidence
 
         for pid, participant in speaking_participants.items():
