@@ -33,6 +33,9 @@ class FusionEngine:
         # Evidence history for temporal decay
         self._evidence_history: list[EvidenceItem] = []
 
+        # Track last evidence timestamp per participant for O(1) decay lookup
+        self._last_evidence_time: dict[str, float] = {}
+
         # Current time for decay calculations
         self._current_time: float = 0.0
 
@@ -40,11 +43,13 @@ class FusionEngine:
         """Add a participant with uniform prior."""
         if participant_id not in self._log_odds:
             self._log_odds[participant_id] = 0.0  # Log-odds 0 = 50% prior
+            self._last_evidence_time[participant_id] = 0.0
             logger.debug(f"Added participant {participant_id} to fusion engine")
 
     def remove_participant(self, participant_id: str) -> None:
         """Remove a participant."""
         self._log_odds.pop(participant_id, None)
+        self._last_evidence_time.pop(participant_id, None)
 
     def update(self, evidence: EvidenceItem) -> dict[str, float]:
         """Process a single evidence item and return updated probabilities.
@@ -61,6 +66,8 @@ class FusionEngine:
         pid = evidence.participant_id
         if pid not in self._log_odds:
             self.add_participant(pid)
+
+        self._last_evidence_time[pid] = evidence.timestamp
 
         # Compute log-likelihood ratio from evidence
         # score in [-1, 1], weight controls importance, confidence modulates strength
@@ -95,11 +102,19 @@ class FusionEngine:
         decayed_odds = {}
 
         for pid, log_odd in self._log_odds.items():
-            # Simple approach: no per-evidence decay, just use accumulated log-odds
-            decayed_odds[pid] = log_odd
+            last_time = self._last_evidence_time.get(pid, 0.0)
+            idle_time = max(0.0, self._current_time - last_time)
+            
+            if idle_time > 0.0 and halflife > 0.0:
+                # Pre-computed log(2) = 0.6931471805599453
+                decay_const = 0.6931471805599453 / halflife
+                decay_factor = math.exp(-decay_const * idle_time)
+                decayed_odds[pid] = log_odd * decay_factor
+            else:
+                decayed_odds[pid] = log_odd
 
         # Convert log-odds to probabilities using softmax
-        max_odd = max(decayed_odds.values()) if decayed_odds else 0
+        max_odd = max(decayed_odds.values()) if decayed_odds else 0.0
         exp_odds = {}
 
         for pid, log_odd in decayed_odds.items():
