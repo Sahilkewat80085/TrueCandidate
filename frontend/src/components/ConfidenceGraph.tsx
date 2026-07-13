@@ -30,11 +30,18 @@ export const ConfidenceGraph: React.FC<Props> = ({ timeline, participantNames })
   const chartData = useMemo(() => {
     if (timeline.length === 0) return [];
 
+    // Pre-downsample raw timeline list if it grows large to limit group-by computations
+    let sampledTimeline = timeline;
+    if (timeline.length > 200) {
+      const filterStep = Math.ceil(timeline.length / 100);
+      sampledTimeline = timeline.filter((_, i) => i % filterStep === 0 || i === timeline.length - 1);
+    }
+
     // Group by timestamp
     const byTime: Record<number, Record<string, number>> = {};
     const participants = new Set<string>();
 
-    for (const point of timeline) {
+    for (const point of sampledTimeline) {
       const t = Math.round(point.timestamp);
       if (!byTime[t]) byTime[t] = {};
       byTime[t][point.participant_id] = Math.round(point.confidence * 100);
