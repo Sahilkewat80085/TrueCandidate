@@ -20,6 +20,7 @@ from backend.app.models.evidence import EvidenceItem, SignalType
 from backend.app.models.participant import ParticipantState
 
 
+@functools.lru_cache(maxsize=1024)
 def _normalize(name: str) -> str:
     """Normalize a name for comparison."""
     return re.sub(r'[^a-z0-9\s]', '', name.lower().strip())
